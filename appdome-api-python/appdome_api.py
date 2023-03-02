@@ -111,7 +111,7 @@ def validate_args(args):
 def _upload(api_key, team_id, app_path):
     upload_response = upload(api_key, team_id, app_path)
     validate_response(upload_response)
-    logging.info(f"Upload done. Response: {upload_response.json()}")
+    logging.info(f"Upload done. App-id: {upload_response.json()['id']}")
     return upload_response.json()['id']
 
 
@@ -122,6 +122,7 @@ def _build(api_key, team_id, app_id, fusion_set_id, build_overrides, use_diagnos
     logging.info(f"Build request started. Response: {build_response.json()}")
     task_id = build_response.json()['task_id']
     wait_for_status_complete(api_key, team_id, task_id)
+    logging.info(f"Build request finished.")
     return task_id
 
 
@@ -130,6 +131,7 @@ def _context(api_key, team_id, task_id):
     validate_response(context_response)
     logging.info(f"Context request started. Response: {context_response.json()}")
     wait_for_status_complete(api_key, team_id, task_id)
+    logging.info(f"Context request finished.")
 
 
 def _sign(args, platform, task_id, sign_overrides):

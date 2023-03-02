@@ -16,7 +16,7 @@ OVERRIDES_KEY = 'overrides'
 ACTION_KEY = 'action'
 ANDROID_SIGNING_FINGERPRINT_KEY = 'signing_sha1_fingerprint'
 JSON_CONTENT_TYPE = 'application/json'
-APPDOME_CLIENT_HEADER = getenv('APPDOME_CLIENT_HEADER', 'Appdome-cli/1.0')
+APPDOME_CLIENT_HEADER = getenv('APPDOME_CLIENT_HEADER', 'Appdome-cli-python/1.0')
 
 
 def build_url(*args):

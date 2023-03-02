@@ -41,7 +41,7 @@ def upload(api_key, team_id, file_path):
     if not aws_url or not file_id:
         log_and_exit('Error in upload link response: ' + upload_link_response.text)
 
-    logging.info(f"Uploading file id {file_id} to url: {aws_url}")
+    logging.info(f"Uploading file id {file_id}")
     aws_put_response = put_file_in_aws(file_path, aws_url)
     validate_response(aws_put_response)
     app = upload_using_link(api_key, team_id, file_id, basename(file_path))

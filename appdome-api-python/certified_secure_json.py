@@ -3,7 +3,6 @@ import logging
 from json import load, dump
 from os.path import exists
 from shutil import move
-
 from utils import (validate_response, add_common_args, init_common_args, validate_output_path, task_output_command)
 
 
