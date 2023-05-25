@@ -5,7 +5,7 @@ from time import sleep
 import requests
 
 from utils import (TASKS_URL, request_headers, JSON_CONTENT_TYPE, validate_response,
-                   log_and_exit, add_common_args, init_common_args, build_url, team_params)
+                   					  log_and_exit, add_common_args, init_common_args, build_url, team_params)
 
 
 def status(api_key, team_id, task_id):
@@ -45,7 +45,7 @@ def wait_for_status_complete(api_key, team_id, task_id, interval_sec=10, timeout
         log_and_exit(f"\nTask did not complete in the specified timeout of: {timeout_sec} seconds")
 
     if status_value != 'completed':
-        log_and_exit(f"Task not completed successfully. Response: {status_response_json}")
+        log_and_exit(f"Task not completed successfully. Response: {status_response_json.get('message')}")
 
 
 def parse_arguments():
