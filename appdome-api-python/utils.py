@@ -25,6 +25,7 @@ def build_url(*args):
 
 
 TASKS_URL = build_url(SERVER_API_V1_URL, 'tasks')
+BUILD_TO_TEST_URL = build_url(SERVER_API_V1_URL, 'build-to-test')
 
 
 def team_params(team_id):
@@ -67,7 +68,8 @@ def add_google_play_signing_fingerprint(google_play_signing_fingerprint, overrid
         overrides['signing_keystore_google_signing_sha1_key'] = google_play_signing_fingerprint
 
 
-def add_provisioning_profiles_entitlements(provisioning_profiles_paths, entitlements_paths, files_list, overrides, open_fd):
+def add_provisioning_profiles_entitlements(provisioning_profiles_paths, entitlements_paths, files_list, overrides,
+                                           open_fd):
     for prov_profile_path in provisioning_profiles_paths:
         f = open(prov_profile_path, 'rb')
         open_fd.append(f)
@@ -107,7 +109,7 @@ def task_output_command(api_key, team_id, task_id, command, action=None):
     if action:
         params[ACTION_KEY] = action
     headers = request_headers(api_key, JSON_CONTENT_TYPE)
-    debug_log_request(url, headers=headers,  params=params, request_type='get')
+    debug_log_request(url, headers=headers, params=params, request_type='get')
     return requests.get(url, headers=headers, params=params)
 
 
@@ -119,8 +121,9 @@ def validate_response(response):
             headers_to_print[key] = value_to_print(value)
         body_to_print = value_to_print(response.request.body)
 
-        log_and_exit(f'Validation status for request {response.request.url} with headers {headers_to_print} and body {body_to_print} failed.'
-                     f' Status Code: {response.status_code}. Response: {response.text}')
+        log_and_exit(
+            f'Validation status for request {response.request.url} with headers {headers_to_print} and body {body_to_print} failed.'
+            f' Status Code: {response.status_code}. Response: {response.text}')
 
 
 def value_to_print(value):
@@ -129,13 +132,15 @@ def value_to_print(value):
 
 
 def log_and_exit(log_line):
-    logging.error(log_line)
-    exit(-1)
+    import sys
+    sys.tracebacklimit = 0
+    raise Exception(log_line)
 
 
 def init_logging(verbose=False):
     level = logging.DEBUG if verbose else logging.INFO
-    logging.basicConfig(format='[%(asctime)s] [%(levelname)s] [%(filename)s:%(lineno)d - %(funcName)s] %(message)s', level=level)
+    logging.basicConfig(format='[%(asctime)s] [%(levelname)s] [%(filename)s:%(lineno)d - %(funcName)s] %(message)s',
+                        level=level)
     init_logging.func_code = (lambda: None).__code__
 
 
@@ -148,9 +153,11 @@ def debug_log_request(url, headers=None, data=None, params=None, files=None, req
 
 
 def add_common_args(parser, add_task_id=False, add_team_id=True):
-    parser.add_argument('-key', '--api_key', default=getenv(API_KEY_ENV), metavar=API_KEY_ENV, help=f"Appdome API key. Default is environment variable '{API_KEY_ENV}'")
+    parser.add_argument('-key', '--api_key', default=getenv(API_KEY_ENV), metavar=API_KEY_ENV,
+                        help=f"Appdome API key. Default is environment variable '{API_KEY_ENV}'")
     if add_team_id:
-        parser.add_argument('-t', '--team_id', default=getenv(TEAM_ID_ENV), metavar=TEAM_ID_ENV, help=f"Appdome team id. Default is environment variable '{TEAM_ID_ENV}'")
+        parser.add_argument('-t', '--team_id', default=getenv(TEAM_ID_ENV), metavar=TEAM_ID_ENV,
+                            help=f"Appdome team id. Default is environment variable '{TEAM_ID_ENV}'")
     parser.add_argument('-v', '--verbose', action='store_true', help='Show debug logs')
     if add_task_id:
         parser.add_argument('--task_id', required=True, metavar='task_id_value', help='Build id on Appdome')
