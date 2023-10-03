@@ -25,6 +25,7 @@ def build_url(*args):
 
 
 TASKS_URL = build_url(SERVER_API_V1_URL, 'tasks')
+UPLOAD_URL = build_url(SERVER_API_V1_URL, 'upload')
 BUILD_TO_TEST_URL = build_url(SERVER_API_V1_URL, 'build-to-test')
 
 
