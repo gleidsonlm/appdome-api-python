@@ -8,14 +8,14 @@ from utils import (TASKS_URL, request_headers, JSON_CONTENT_TYPE, validate_respo
                    					  log_and_exit, add_common_args, init_common_args, build_url, team_params)
 
 
-def status(api_key, team_id, task_id):
-    url = build_url(TASKS_URL, task_id, 'status')
+def status(api_key, team_id, task_id, url):
+    url = build_url(url, task_id, 'status')
     params = team_params(team_id)
     headers = request_headers(api_key, JSON_CONTENT_TYPE)
     return requests.get(url, headers=headers, params=params)
 
 
-def wait_for_status_complete(api_key, team_id, task_id, interval_sec=10, timeout_sec=3600, num_of_retries=3):
+def wait_for_status_complete(api_key, team_id, task_id, url=TASKS_URL, interval_sec=10, timeout_sec=3600, num_of_retries=3):
     accumulated_sleep = 0
     status_value = 'not initialized'
     status_response_json = ''
@@ -23,7 +23,7 @@ def wait_for_status_complete(api_key, team_id, task_id, interval_sec=10, timeout
         status_response = None
         for i in range(num_of_retries):
             try:
-                status_response = status(api_key, team_id, task_id)
+                status_response = status(api_key, team_id, task_id, url)
             except Exception as e:
                 if i == num_of_retries - 1:
                     raise Exception('Wait for status Error. Error: {}'.format(e))
