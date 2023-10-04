@@ -26,7 +26,6 @@ def put_file_in_aws(file_path, aws_url):
 def upload_using_link(api_key, team_id, file_id, file_name):
     url = build_url(SERVER_API_V1_URL, 'upload-using-link')
     params = team_params(team_id)
-    params["async"] = True
     headers = request_headers(api_key)
     body = {'file_app_id': file_id, 'file_name': file_name}
     debug_log_request(url, params=params, data=body)
@@ -48,8 +47,6 @@ def upload(api_key, team_id, file_path):
     validate_response(aws_put_response)
     app = upload_using_link(api_key, team_id, file_id, basename(file_path))
     validate_response(app)
-    app_id = app.json()['id']
-    wait_for_status_complete(api_key, team_id, app_id, url=UPLOAD_URL)
     return app
 
 
