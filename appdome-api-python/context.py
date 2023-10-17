@@ -5,7 +5,7 @@ from utils import run_task_action, cleaned_fd_list, validate_response, add_commo
 
 
 def context(api_key, team_id, task_id, new_bundle_id=None, new_version=None,
-            new_build_num=None, new_display_name=None, app_icon_path=None, icon_overlay_path=None):
+            new_build_num=None, new_display_name=None, app_icon_path=None, icon_overlay_path=None, context_overrides=None):
 
     overrides = {}
     if new_bundle_id:
@@ -16,6 +16,8 @@ def context(api_key, team_id, task_id, new_bundle_id=None, new_version=None,
         overrides['app_customization_pack_bundle_build_number'] = new_build_num
     if new_display_name:
         overrides['app_customization_pack_bundle_display_name'] = new_display_name
+    if context_overrides:
+        overrides.update(context_overrides)
 
     files = {}
     with cleaned_fd_list() as open_fd:
