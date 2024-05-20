@@ -3,7 +3,6 @@ import logging
 from enum import Enum
 from os import getenv
 from os.path import splitext
-
 from build_to_test import BuildToTestVendors, build_to_test, init_automation_vendor
 from auto_dev_sign import auto_dev_sign_android, auto_dev_sign_ios
 from build import build
@@ -17,6 +16,8 @@ from status import wait_for_status_complete
 from upload import upload
 from utils import (validate_response, log_and_exit, add_common_args, init_common_args, validate_output_path,
                    init_overrides)
+from status import _get_obfuscation_map_status
+from crashlytics import upload_deobfuscation_map
 
 
 class Platform(Enum):
@@ -43,6 +44,8 @@ def parse_arguments():
                         help="Build the app with Appdome's Diagnostic Logs (if licensed)")
     parser.add_argument('-sv', '--sign_overrides', metavar='overrides_json_file',
                         help='Path to json file with sign overrides')
+    parser.add_argument('-faid', '--firebase_app_id', metavar='firebase_app_id',
+                        help='App ID in Firebase project (required for Crashlytics)')
 
     sign_group = parser.add_mutually_exclusive_group(required=True)
     sign_group.add_argument('-s', '--sign_on_appdome', action='store_true', help='Sign on Appdome')
@@ -71,7 +74,7 @@ def parse_arguments():
     # Output parameters
     parser.add_argument('-o', '--output', metavar='output_app_file',
                         help='Output file for fused and signed app after Appdome')
-    parser.add_argument('--deobfuscation_script_output', metavar='deobfuscation_scripts_zip_file',
+    parser.add_argument('-dso', '--deobfuscation_script_output', metavar='deobfuscation_scripts_zip_file',
                         help='Output file deobfuscation scripts when building with "Obfuscate App Logic"')
     parser.add_argument('--sign_second_output', metavar='second_output_app_file',
                         help='Output file for secondary output file - universal apk when building an aab app')
@@ -214,8 +217,11 @@ def main():
 
     if args.output:
         _download_file(args.api_key, args.team_id, task_id, args.output, download)
-    download_action(args.api_key, args.team_id, task_id, args.deobfuscation_script_output, 'deobfuscation_script')
-    download_action(args.api_key, args.team_id, task_id, args.sign_second_output, 'sign_second_output')
+    if _get_obfuscation_map_status(args.api_key, args.team_id, task_id):
+        download_action(args.api_key, args.team_id, task_id, args.deobfuscation_script_output, 'deobfuscation_script')
+        upload_deobfuscation_map(args.deobfuscation_script_output, args.firebase_app_id)
+    if not args.auto_dev_private_signing:
+        download_action(args.api_key, args.team_id, task_id, args.sign_second_output, 'sign_second_output')
     if args.certificate_output:
         _download_file(args.api_key, args.team_id, task_id, args.certificate_output, download_certified_secure)
     if args.certificate_json:
