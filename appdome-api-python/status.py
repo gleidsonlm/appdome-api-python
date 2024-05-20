@@ -5,7 +5,7 @@ from time import sleep
 import requests
 
 from utils import (TASKS_URL, request_headers, JSON_CONTENT_TYPE, validate_response,
-                   					  log_and_exit, add_common_args, init_common_args, build_url, team_params)
+                   log_and_exit, add_common_args, init_common_args, build_url, team_params)
 
 
 def status(api_key, team_id, task_id, url):
@@ -15,7 +15,8 @@ def status(api_key, team_id, task_id, url):
     return requests.get(url, headers=headers, params=params)
 
 
-def wait_for_status_complete(api_key, team_id, task_id, url=TASKS_URL, interval_sec=10, timeout_sec=3600, num_of_retries=3):
+def wait_for_status_complete(api_key, team_id, task_id, url=TASKS_URL, interval_sec=10, timeout_sec=3600,
+                             num_of_retries=3):
     accumulated_sleep = 0
     status_value = 'not initialized'
     status_response_json = ''
@@ -46,6 +47,15 @@ def wait_for_status_complete(api_key, team_id, task_id, url=TASKS_URL, interval_
 
     if status_value != 'completed':
         log_and_exit(f"Task not completed successfully. Response: {status_response_json.get('message')}")
+
+
+def _get_obfuscation_map_status(api_key, team_id, task_id):
+    try:
+        status_response = status(api_key, team_id, task_id, TASKS_URL)
+        status_response_json = status_response.json()
+        return status_response_json.get('obfuscationMapExists', False)
+    except Exception as e:
+        print(f"Couldn't get status of obfuscation map. Error: {e}")
 
 
 def parse_arguments():
