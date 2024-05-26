@@ -219,7 +219,7 @@ def main():
         _download_file(args.api_key, args.team_id, task_id, args.output, download)
     if _get_obfuscation_map_status(args.api_key, args.team_id, task_id):
         download_action(args.api_key, args.team_id, task_id, args.deobfuscation_script_output, 'deobfuscation_script')
-        if args.deobfuscation_script_output:
+        if args.deobfuscation_script_output and args.firebase_app_id:
             upload_deobfuscation_map(args.deobfuscation_script_output, args.firebase_app_id)
     if not args.auto_dev_private_signing:
         download_action(args.api_key, args.team_id, task_id, args.sign_second_output, 'sign_second_output')
