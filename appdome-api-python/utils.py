@@ -5,7 +5,6 @@ from contextlib import contextmanager
 from os import getenv, makedirs
 from os.path import isdir, dirname, exists
 from urllib.parse import urljoin
-
 import requests
 
 SERVER_BASE_URL = getenv('APPDOME_SERVER_BASE_URL', 'https://fusion.appdome.com/')
