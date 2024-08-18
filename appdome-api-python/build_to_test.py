@@ -14,6 +14,13 @@ class BuildToTestVendors(Enum):
     AUTOMATION_SAUCELABS = 'saucelabs'
     AUTOMATION_BROWSERSTACK = 'browserstack'
     AUTOMATION_LAMBDATEST = 'lambdatest'
+    AUTOMATION_PERFECTO = 'perfecto'
+    AUTOMATION_FIREBASE = 'firebase'
+    AUTOMATION_KATALON = 'katalon'
+    AUTOMATION_KOBITON = 'kobiton'
+    AUTOMATION_TOSCA = 'tosca'
+    AUTOMATION_AWS_DEVICE_FARM = 'aws_device_farm'
+
 
 
 build_to_test_default_message = "App is not running on {}. Exiting"
