@@ -25,10 +25,6 @@ def upload_deobfuscation_map(deobfuscation_script_output, faid):
         logging.warning("Missing Firebase project app ID. "
                        "Skipping code deobfuscation mapping file upload to Crashlytics.")
         return
-    if not os.getenv("GOOGLE_APPLICATION_CREDENTIALS"):
-        logging.warning("Missing Google authentication service file. "
-              "Skipping code deobfuscation mapping file upload to Crashlytics.")
-        return
 
     with erasedTempDir() as tmpdir:
         with zipfile.ZipFile(deobfuscation_script_output, "r") as zip_file:
