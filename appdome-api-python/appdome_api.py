@@ -64,6 +64,8 @@ def parse_arguments():
                         help='Password for the key to use on Appdome Android signing.')
     parser.add_argument('-cf', '--signing_fingerprint', metavar='signing_fingerprint',
                         help='SHA-1 or SHA-256 final Android signing certificate fingerprint.')
+    parser.add_argument('-cfu', '--signing_fingerprint_upgrade', metavar='signing_fingerprint_upgrade',
+                        help='SHA-1 or SHA-256 Upgraded signing certificate fingerprint for Google Play App Signing.')
     parser.add_argument('-gp', '--google_play_signing', action='store_true',
                         help='This Android application will be distributed via the Google Play App Signing program.')
     parser.add_argument('-pr', '--provisioning_profiles', nargs='+', metavar='provisioning_profile_file',
@@ -128,6 +130,11 @@ def validate_args(args):
     if args.build_to_test_vendor and not any(
             args.build_to_test_vendor == vendor.value for vendor in BuildToTestVendors):
         log_and_exit(f"Vendor name provided for Build To Test isn't one of the acceptable vendors")
+    
+    if args.google_play_signing:
+        if args.signing_fingerprint_upgrade and not args.signing_fingerprint:
+            log_and_exit(f"Base Google signing fingerprint is required to upgrade the fingerprint")
+
     validate_output_path(args.output)
     validate_output_path(args.certificate_output)
     validate_output_path(args.certificate_json)
@@ -171,13 +178,14 @@ def _sign(args, platform, task_id, sign_overrides):
         if args.sign_on_appdome:
             r = sign_android(args.api_key, args.team_id, task_id, args.keystore, args.keystore_pass,
                              args.keystore_alias, args.key_pass,
-                             args.signing_fingerprint if args.google_play_signing else None, sign_overrides_json)
+                             args.signing_fingerprint if args.google_play_signing else None, sign_overrides_json,
+                             args.signing_fingerprint_upgrade if args.google_play_signing else None)
         elif args.private_signing:
             r = private_sign_android(args.api_key, args.team_id, task_id, args.signing_fingerprint,
-                                     args.google_play_signing, sign_overrides_json)
+                                     args.google_play_signing, sign_overrides_json, args.signing_fingerprint_upgrade)
         else:
             r = auto_dev_sign_android(args.api_key, args.team_id, task_id, args.signing_fingerprint,
-                                      args.google_play_signing, sign_overrides_json)
+                                      args.google_play_signing, sign_overrides_json, args.signing_fingerprint_upgrade)
     else:
         if args.sign_on_appdome:
             r = sign_ios(args.api_key, args.team_id, task_id, args.keystore, args.keystore_pass,

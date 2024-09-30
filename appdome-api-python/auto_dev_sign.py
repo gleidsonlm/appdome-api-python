@@ -7,10 +7,11 @@ from utils import (cleaned_fd_list, add_provisioning_profiles_entitlements, run_
 AUTO_DEV_SIGN_ACTION = 'sign_script'
 
 
-def auto_dev_sign_android(api_key, team_id, task_id, signing_fingerprint, is_google_play_signing=False, sign_overrides=None):
+def auto_dev_sign_android(api_key, team_id, task_id, signing_fingerprint, is_google_play_signing=False,
+                          sign_overrides=None, signing_fingerprint_upgrade=None):
     overrides = {}
     if is_google_play_signing:
-        add_google_play_signing_fingerprint(signing_fingerprint, overrides)
+        add_google_play_signing_fingerprint(signing_fingerprint, overrides, signing_fingerprint_upgrade)
     else:
         overrides[ANDROID_SIGNING_FINGERPRINT_KEY] = signing_fingerprint
 
@@ -36,6 +37,7 @@ def parse_arguments():
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('-pr', '--provisioning_profiles', nargs='+', metavar='provisioning_profile_file', help='Path to iOS provisioning profiles files to use. Can be multiple profiles')
     group.add_argument('-cf', '--signing_fingerprint', metavar='signing_fingerprint', help='SHA-1 or SHA-256 final Android signing certificate fingerprint.')
+    parser.add_argument('-cfu', '--google_play_signing_fingerprint_upgrade', metavar='signing_fingerprint_upgrade', help='SHA-1 or SHA-256 Google Play upgrade App Signing certificate fingerprint.')
     parser.add_argument('-entt', '--entitlements', nargs='+', metavar='entitlements_plist_path', help='Path to iOS entitlements plist to use. Can be multiple entitlements files')
     parser.add_argument('-gp', '--google_play_signing', action='store_true', help='This Android application will be distributed via the Google Play App Signing program.')
     parser.add_argument('-sv', '--sign_overrides', metavar='overrides_json_file', help='Path to json file with sign overrides')
@@ -49,7 +51,7 @@ def main():
     overrides = init_overrides(args.sign_overrides)
 
     if args.signing_fingerprint:
-        r = auto_dev_sign_android(args.api_key, args.team_id, args.task_id, args.signing_fingerprint, args.google_play_signing, overrides)
+        r = auto_dev_sign_android(args.api_key, args.team_id, args.task_id, args.signing_fingerprint, args.google_play_signing, overrides, args.google_play_signing_fingerprint_upgrade)
     else:
         r = auto_dev_sign_ios(args.api_key, args.team_id, args.task_id, args.provisioning_profiles, args.entitlements, overrides)
 
