@@ -9,14 +9,16 @@ SIGN_ACTION = 'sign'
 
 def sign_android(api_key, team_id, task_id,
                  keystore_path, keystore_pass, key_alias, key_pass,
-                 google_play_signing_fingerprint=None, sign_overrides=None):
+                 google_play_signing_fingerprint=None, sign_overrides=None,
+                 google_play_signing_fingerprint_upgrade=None):
     overrides = {
         'signing_keystore_password':  keystore_pass,
         'signing_keystore_alias': key_alias,
         'signing_keystore_key_password': key_pass
     }
     
-    add_google_play_signing_fingerprint(google_play_signing_fingerprint, overrides)
+    add_google_play_signing_fingerprint(google_play_signing_fingerprint, overrides,
+                                        google_play_signing_fingerprint_upgrade)
 
     if sign_overrides:
         overrides.update(sign_overrides)
@@ -52,6 +54,7 @@ def parse_arguments():
     group.add_argument('-ka', '--keystore_alias', metavar='key_alias', help='Key alias to use on Appdome Android signing.')
     parser.add_argument('-kyp', '--key_pass', metavar='key_password', help='Password for the key to use on Appdome Android signing.')
     parser.add_argument('--google_play_signing_fingerprint', metavar='signing_fingerprint', help='SHA-1 or SHA-256 Google Play App Signing certificate fingerprint.')
+    parser.add_argument('--google_play_signing_fingerprint_upgrade', metavar='signing_fingerprint_upgrade', help='SHA-1 or SHA-256 Google Play upgrade App Signing certificate fingerprint.')
     parser.add_argument('-gp', '--google_play_signing', action='store_true', help='This Android application will be distributed via the Google Play App Signing program.')
     parser.add_argument('-entt', '--entitlements', nargs='+', metavar='entitlements_plist_path', help='Path to iOS entitlements plist to use. Can be multiple entitlements files')
     return parser.parse_args()
@@ -65,7 +68,8 @@ def main():
 
     if args.keystore_alias:
         r = sign_android(args.api_key, args.team_id, args.task_id, args.keystore, args.keystore_pass,
-                         args.keystore_alias, args.key_pass, args.google_play_signing_fingerprint, overrides)
+                         args.keystore_alias, args.key_pass, args.google_play_signing_fingerprint, overrides,
+                         args.google_play_signing_fingerprint_upgrade)
     else:
         r = sign_ios(args.api_key, args.team_id, args.task_id, args.keystore, args.keystore_pass,
                      args.provisioning_profiles, args.entitlements, overrides)

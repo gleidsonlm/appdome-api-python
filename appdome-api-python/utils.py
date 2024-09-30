@@ -62,10 +62,14 @@ def cleaned_fd_list():
             f.close()
 
 
-def add_google_play_signing_fingerprint(google_play_signing_fingerprint, overrides):
+def add_google_play_signing_fingerprint(google_play_signing_fingerprint, overrides,
+                                        google_play_signing_fingerprint_upgrade=None):
     if google_play_signing_fingerprint:
         overrides['signing_keystore_use_google_signing'] = True
         overrides['signing_keystore_google_signing_sha1_key'] = google_play_signing_fingerprint
+        if google_play_signing_fingerprint_upgrade:
+            overrides['signing_keystore_google_signing_upgrade'] = True
+            overrides['signing_keystore_google_signing_sha1_key_2nd_cert'] = google_play_signing_fingerprint_upgrade
 
 
 def add_provisioning_profiles_entitlements(provisioning_profiles_paths, entitlements_paths, files_list, overrides,
