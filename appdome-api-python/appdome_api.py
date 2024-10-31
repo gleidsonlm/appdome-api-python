@@ -129,6 +129,9 @@ def validate_args(args):
             log_and_exit(f"keystore and keystore_pass must be specified when using on Appdome signing")
         if platform == Platform.ANDROID and (not args.keystore_alias or not args.key_pass):
             log_and_exit(f"keystore_alias and key_pass must be specified when using on Appdome Android signing")
+        if args.google_play_signing and not args.signing_fingerprint:
+            log_and_exit(f"Google signing fingerprint requires providing a signing fingerprint")
+
     if args.build_to_test_vendor and not any(
             args.build_to_test_vendor == vendor.value for vendor in BuildToTestVendors):
         log_and_exit(f"Vendor name provided for Build To Test isn't one of the acceptable vendors")
