@@ -4,8 +4,8 @@ from os.path import basename
 
 import requests
 
-from utils import (SERVER_API_V1_URL, UPLOAD_URL, request_headers, empty_files, validate_response, debug_log_request,
-                   add_common_args, log_and_exit, init_common_args, build_url, team_params)
+from utils import (SERVER_API_V1_URL, UPLOAD_URL, request_headers, empty_files, validate_response, debug_log_request, 
+ 									  add_common_args, log_and_exit, init_common_args, build_url, team_params)
 from status import wait_for_status_complete
 
 
@@ -49,7 +49,7 @@ def upload(api_key, team_id, file_path):
     app = upload_using_link(api_key, team_id, file_id, basename(file_path))
     validate_response(app)
     app_id = app.json()['id']
-    wait_for_status_complete(api_key, team_id, app_id, url=UPLOAD_URL)
+    wait_for_status_complete(api_key, team_id, app_id, url=UPLOAD_URL, operation="upload")
     return app
 
 

@@ -88,6 +88,8 @@ def parse_arguments():
                         help='Output file for Certified Secure json')
     parser.add_argument('-bt', '--build_to_test_vendor', metavar='build_to_test_vendor',
                         help='Enter vendor name on which Build to Test will happen')
+    parser.add_argument('-wol', '--workflow_output_logs', metavar='workflow_output_logs',
+                        help='Enter path to a workflow output logs file (optional)')
     return parser.parse_args()
 
 
@@ -153,7 +155,8 @@ def _upload(api_key, team_id, app_path):
     return upload_response.json()['id']
 
 
-def _build(api_key, team_id, app_id, fusion_set_id, build_overrides, use_diagnostic_logs, build_to_test_vendor):
+def _build(api_key, team_id, app_id, fusion_set_id, build_overrides, use_diagnostic_logs, build_to_test_vendor,
+           workflow_output_logs=None):
     build_overrides_json = init_overrides(build_overrides)
     if build_to_test_vendor:
         automation_vendor = init_automation_vendor(build_to_test_vendor).name
@@ -164,20 +167,22 @@ def _build(api_key, team_id, app_id, fusion_set_id, build_overrides, use_diagnos
     validate_response(build_response)
     logging.info(f"Build request started. Response: {build_response.json()}")
     task_id = build_response.json()['task_id']
-    wait_for_status_complete(api_key, team_id, task_id)
+    wait_for_status_complete(api_key, team_id, task_id, operation="build",
+                             workflow_output_logs_path=workflow_output_logs)
     logging.info(f"Build request finished.")
     return task_id
 
 
-def _context(api_key, team_id, task_id):
+def _context(api_key, team_id, task_id, workflow_output_logs=None):
     context_response = context(api_key, team_id, task_id)
     validate_response(context_response)
     logging.info(f"Context request started. Response: {context_response.json()}")
-    wait_for_status_complete(api_key, team_id, task_id)
+    wait_for_status_complete(api_key, team_id, task_id, operation="context",
+                             workflow_output_logs_path=workflow_output_logs)
     logging.info(f"Context request finished.")
 
 
-def _sign(args, platform, task_id, sign_overrides):
+def _sign(args, platform, task_id, sign_overrides, workflow_output_logs=None):
     sign_overrides_json = init_overrides(sign_overrides)
     if platform == Platform.ANDROID:
         if args.sign_on_appdome:
@@ -203,7 +208,8 @@ def _sign(args, platform, task_id, sign_overrides):
 
     validate_response(r)
     logging.info(f"Signing request started. Response: {r.json()}")
-    wait_for_status_complete(args.api_key, args.team_id, task_id)
+    wait_for_status_complete(args.api_key, args.team_id, task_id, operation="sign",
+                             workflow_output_logs_path=workflow_output_logs)
     logging.info(f"Signing request finished.")
 
 
@@ -222,11 +228,11 @@ def main():
     app_id = _upload(args.api_key, args.team_id, args.app) if args.app else args.app_id
 
     task_id = _build(args.api_key, args.team_id, app_id, fusion_set_id, args.build_overrides, args.diagnostic_logs,
-                     args.build_to_test_vendor)
+                     args.build_to_test_vendor, args.workflow_output_logs)
 
-    _context(args.api_key, args.team_id, task_id)
+    _context(args.api_key, args.team_id, task_id, args.workflow_output_logs)
 
-    _sign(args, platform, task_id, args.sign_overrides)
+    _sign(args, platform, task_id, args.sign_overrides, args.workflow_output_logs)
 
     if args.output:
         _download_file(args.api_key, args.team_id, task_id, args.output, download)

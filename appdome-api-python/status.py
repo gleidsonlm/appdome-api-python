@@ -1,5 +1,6 @@
 import argparse
 import logging
+from datetime import datetime
 from time import sleep
 
 import requests
@@ -8,36 +9,78 @@ from utils import (TASKS_URL, request_headers, JSON_CONTENT_TYPE, validate_respo
                    log_and_exit, add_common_args, init_common_args, build_url, team_params)
 
 
-def status(api_key, team_id, task_id, url):
+def status(api_key, team_id, task_id, url, last_date=None, messages=None):
     url = build_url(url, task_id, 'status')
     params = team_params(team_id)
     headers = request_headers(api_key, JSON_CONTENT_TYPE)
-    return requests.get(url, headers=headers, params=params)
+    if messages:
+        if last_date is not None and last_date != '':
+            request_url = f"{url}?messages=true&lastDate={last_date}"
+        else:
+            request_url = f"{url}?messages=true"
+    else:
+        request_url = url
+    return requests.get(request_url, headers=headers, params=params)
 
 
 def wait_for_status_complete(api_key, team_id, task_id, url=TASKS_URL, interval_sec=10, timeout_sec=3600,
-                             num_of_retries=3):
+                             num_of_retries=3, operation=None, workflow_output_logs_path=None):
     accumulated_sleep = 0
     status_value = 'not initialized'
+    file_handle = open(workflow_output_logs_path, 'a') if workflow_output_logs_path else None
     status_response_json = ''
+    last_date = ''
+
+    # Determine whether to use detailed logging based on the URL
+    detailed_logging = operation != "upload" and file_handle is not None
+
+    if file_handle:
+        file_handle.write(operation + ":\n")
+
     while accumulated_sleep <= timeout_sec:
         status_response = None
         for i in range(num_of_retries):
             try:
-                status_response = status(api_key, team_id, task_id, url)
+                if detailed_logging:
+                    last_date = last_date
+                    messages = True
+                else:
+                    last_date = None
+                    messages = False
+                status_response = status(api_key, team_id, task_id, url, last_date, messages)
+                break  # Exit retry loop on success
             except Exception as e:
                 if i == num_of_retries - 1:
-                    raise Exception('Wait for status Error. Error: {}'.format(e))
-                logging.debug('Wait for status Error. Error: {}'.format(e))
+                    raise Exception(f'Wait for status Error. Error: {e}')
+                logging.debug(f'Wait for status Error. Error: {e}')
                 sleep(interval_sec)
+
         validate_response(status_response)
         status_response_json = status_response.json()
         status_value = status_response_json.get('status', '')
+
         if status_value == 'progress':
-            logging.debug(f'Task not complete. Response: {status_response_json}. Sleeping for {interval_sec} seconds')
-            print('.', end='', flush=True)
+            if detailed_logging:
+                messages = status_response_json.get('messages', [])
+                for message in messages:
+                    message_text = message.get('message', {}).get('text', '')
+                    message_type = message.get('message_type', '')
+
+                    if message_text:
+                        print(f" - {message_text}")
+                        if message_text:
+                            if file_handle:
+                                file_handle.write(message_text + '\n')
+
+                if messages:
+                    last_date = messages[-1].get('creation_time')
+
+            else:
+                print('.', end='', flush=True)
+
             sleep(interval_sec)
             accumulated_sleep += interval_sec
+
         else:
             print('', flush=True)
             break
