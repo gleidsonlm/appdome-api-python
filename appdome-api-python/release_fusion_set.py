@@ -27,6 +27,7 @@ def main():
     r = release_fusion_set(args.api_key, args.fusion_set_id, args.team_id)
     validate_response(r)
     logging.info(f"Fusion-set {args.fusion_set_id} was successfully released to team: {args.team_id}")
+    logging.info(f"New Fusion-set id: {r.json()['new_fusion_set_id']}")
 
 
 if __name__ == '__main__':
