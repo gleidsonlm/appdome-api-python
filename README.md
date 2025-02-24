@@ -31,6 +31,9 @@ python3 appdome_api.py \
 --key_pass <key password> \
 --output <output apk/aab> \
 --certificate_output <output certificate pdf>
+--deobfuscation_script_output <file path for downloading deobfuscation zip file>
+--firebase_app_id <app-id for uploading mapping file for crashlytics (requires --deobfuscation_script_output and firebase CLI tools)>
+--datadog_api_key <datadog api key for uploading mapping file to datadog (requires --deobfuscation_script_output)>
 ```
 
 #### Android SDK Example:
