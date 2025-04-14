@@ -114,6 +114,11 @@ def init_overrides(overrides_file):
             overrides = json.load(f)
     return overrides
 
+def init_baseline_file(baseline_profile):
+    files = {}
+    if baseline_profile:
+        files = {"baseline_profile": (baseline_profile, open(baseline_profile, "rb"), "application/zip")}
+    return files
 
 def run_task_action(api_key, team_id, action, task_id, overrides, files):
     if not files:

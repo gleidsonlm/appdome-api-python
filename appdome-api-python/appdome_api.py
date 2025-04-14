@@ -15,7 +15,7 @@ from sign import sign_android, sign_ios
 from status import wait_for_status_complete
 from upload import upload
 from utils import (validate_response, log_and_exit, add_common_args, init_common_args, validate_output_path,
-                   init_overrides)
+                   init_overrides, init_baseline_file)
 from status import _get_obfuscation_map_status
 from upload_mapping_file import upload_mapping_file
 
@@ -48,6 +48,8 @@ def parse_arguments():
                         help='App ID in Firebase project (required for Crashlytics)')
     parser.add_argument('-dd_api_key', '--datadog_api_key', metavar='datadog_api_key',
                         help='Data Dog API_KEY (required for DataDog Deobfuscation)')
+    parser.add_argument('-baseline_profile', '--baseline_profile', metavar='baseline_profile',
+                        help='baseline profile file to use')
 
     sign_group = parser.add_mutually_exclusive_group(required=True)
     sign_group.add_argument('-s', '--sign_on_appdome', action='store_true', help='Sign on Appdome')
@@ -156,14 +158,17 @@ def _upload(api_key, team_id, app_path):
 
 
 def _build(api_key, team_id, app_id, fusion_set_id, build_overrides, use_diagnostic_logs, build_to_test_vendor,
-           workflow_output_logs=None):
+           workflow_output_logs=None, baseline_profile=None):
     build_overrides_json = init_overrides(build_overrides)
+    files = init_baseline_file(baseline_profile)
     if build_to_test_vendor:
         automation_vendor = init_automation_vendor(build_to_test_vendor).name
         build_response = build_to_test(api_key, team_id, app_id, fusion_set_id, automation_vendor,
-                                       overrides=build_overrides_json, use_diagnostic_logs=use_diagnostic_logs)
+                                       overrides=build_overrides_json, use_diagnostic_logs=use_diagnostic_logs,
+                                       files=files)
     else:
-        build_response = build(api_key, team_id, app_id, fusion_set_id, build_overrides_json, use_diagnostic_logs)
+        build_response = build(api_key, team_id, app_id, fusion_set_id, build_overrides_json, use_diagnostic_logs,
+                               files=files)
     validate_response(build_response)
     logging.info(f"Build request started. Response: {build_response.json()}")
     task_id = build_response.json()['task_id']
@@ -228,7 +233,7 @@ def main():
     app_id = _upload(args.api_key, args.team_id, args.app) if args.app else args.app_id
 
     task_id = _build(args.api_key, args.team_id, app_id, fusion_set_id, args.build_overrides, args.diagnostic_logs,
-                     args.build_to_test_vendor, args.workflow_output_logs)
+                     args.build_to_test_vendor, args.workflow_output_logs, args.baseline_profile)
 
     _context(args.api_key, args.team_id, task_id, args.workflow_output_logs)
 
