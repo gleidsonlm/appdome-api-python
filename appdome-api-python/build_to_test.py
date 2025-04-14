@@ -50,12 +50,12 @@ def create_build_to_test_request(api_key, team_id, app_id, fusion_set_id, vendor
 
 
 def build_to_test(api_key, team_id, app_id, fusion_set_id, vendor,
-                  automation_vendor_err_msg=None, overrides=None, use_diagnostic_logs=False):
+                  automation_vendor_err_msg=None, overrides=None, use_diagnostic_logs=False, files=None):
     url, headers, body, params = create_build_to_test_request(api_key, team_id, app_id, fusion_set_id,
                                                               vendor, automation_vendor_err_msg, overrides,
                                                               use_diagnostic_logs)
     debug_log_request(url, headers=headers, params=params, data=body)
-    return requests.post(url, headers=headers, params=params, data=body, files=empty_files())
+    return requests.post(url, headers=headers, params=params, data=body, files=files if files else empty_files())
 
 
 def init_automation_vendor(automation_vendor):

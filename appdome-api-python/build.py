@@ -25,10 +25,10 @@ def create_build_request(api_key, team_id, app_id, fusion_set_id, overrides=None
     return url, headers, body, params
 
 
-def build(api_key, team_id, app_id, fusion_set_id, overrides=None, use_diagnostic_logs=False):
+def build(api_key, team_id, app_id, fusion_set_id, overrides=None, use_diagnostic_logs=False, files=None):
     url, headers, body, params = create_build_request(api_key, team_id, app_id, fusion_set_id, overrides, use_diagnostic_logs)
     debug_log_request(url, headers=headers, params=params, data=body)
-    return requests.post(url, headers=headers, params=params, data=body, files=empty_files())
+    return requests.post(url, headers=headers, params=params, data=body, files=files if files else empty_files())
 
 
 def parse_arguments():
