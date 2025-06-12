@@ -83,7 +83,7 @@ python3 appdome_api_sdk.py \
 --certificate_output <output certificate pdf>
 ```
 
-**Note:**
+#### update certificate pinning:
 To update certificate pinning, you need to provide a ZIP file containing the SSL certificates and a JSON mapping file.
 This ZIP file should be specified using the `--cert_pinning_zip` option in your command.
 
