@@ -11,8 +11,7 @@ from shutil import rmtree
 from urllib.parse import urljoin
 import requests
 
-# SERVER_BASE_URL = getenv('APPDOME_SERVER_BASE_URL', 'https://fusion.appdome.com/')
-SERVER_BASE_URL = 'https://qamaster.dev.appdome.com/'
+SERVER_BASE_URL = getenv('APPDOME_SERVER_BASE_URL', 'https://fusion.appdome.com/')
 SERVER_API_V1_URL = urljoin(SERVER_BASE_URL, 'api/v1')
 API_KEY_ENV = 'APPDOME_API_KEY'
 TEAM_ID_ENV = 'APPDOME_TEAM_ID'
