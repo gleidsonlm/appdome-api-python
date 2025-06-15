@@ -1,16 +1,18 @@
 import json
 import logging
 import os
+import shutil
 import tempfile
 import zipfile
 from contextlib import contextmanager
 from os import getenv, makedirs, listdir
-from os.path import isdir, dirname, exists, splitext, join
+from os.path import isdir, dirname, exists, splitext, join, basename
 from shutil import rmtree
 from urllib.parse import urljoin
 import requests
 
-SERVER_BASE_URL = getenv('APPDOME_SERVER_BASE_URL', 'https://fusion.appdome.com/')
+# SERVER_BASE_URL = getenv('APPDOME_SERVER_BASE_URL', 'https://fusion.appdome.com/')
+SERVER_BASE_URL = 'https://qamaster.dev.appdome.com/'
 SERVER_API_V1_URL = urljoin(SERVER_BASE_URL, 'api/v1')
 API_KEY_ENV = 'APPDOME_API_KEY'
 TEAM_ID_ENV = 'APPDOME_TEAM_ID'
@@ -134,7 +136,7 @@ def init_certs_pinning(cert_pinning_zip):
         return []  # Return an empty list if the file is not a valid zip or does not exist
     files = []
     with zipfile.ZipFile(cert_pinning_zip, 'r') as zip_ref:
-        extract_path = splitext(cert_pinning_zip)[0]  # Extract to a folder with the same name as the zip
+        extract_path = splitext(cert_pinning_zip)[0] + "_unzipped"  # Extract to a folder with the same name as the zip
         zip_ref.extractall(extract_path)
 
         # Locate the JSON file and parse it
@@ -154,7 +156,7 @@ def init_certs_pinning(cert_pinning_zip):
                     f"mitm_host_server_pinned_certs_list['{index}'].value.mitm_host_server_pinned_certs_file_content",
                     (file_name, open(file_path, 'rb'), 'application/octet-stream')
                 ))
-
+    shutil.rmtree(extract_path)
     return files
 
 def run_task_action(api_key, team_id, action, task_id, overrides, files):
